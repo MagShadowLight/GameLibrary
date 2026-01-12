@@ -11,5 +11,7 @@ namespace GameLibraryData
         public List<T> GetAll();
 
         public T GetById(int id);
+
+        public T GetByTitle(string title);
     }
 }
