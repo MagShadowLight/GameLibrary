@@ -28,7 +28,7 @@ namespace GameLibraryData.Repository
                             Publisher,
                             ReleaseDate,
                             Genre,
-                            UnitPrice
+                            Prices
                     FROM dbo.Games;
                     """, connection))
                 {
@@ -68,7 +68,7 @@ namespace GameLibraryData.Repository
                             Publisher,
                             ReleaseDate,
                             Genre,
-                            UnitPrice
+                            Prices
                     FROM dbo.Games
                     WHERE GameId = @Id;
                     """, connection))
@@ -110,7 +110,7 @@ namespace GameLibraryData.Repository
                             Publisher,
                             ReleaseDate,
                             Genre,
-                            UnitPrice
+                            Prices
                     FROM dbo.Games
                     WHERE Title = @Title;
                     """, connection))
