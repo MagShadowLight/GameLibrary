@@ -12,6 +12,8 @@ namespace GameLibraryData
 
         public T GetById(int id);
 
-        public T GetByTitle(string title);
+        public T GetByName(string name);
+        public int Update(T entity);
+        public int Delete(int id);
     }
 }
