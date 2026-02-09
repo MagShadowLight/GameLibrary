@@ -10,15 +10,7 @@ namespace GameLibraryData.Repository
 {
     public class UserRepository : IDataAccess<User>
     {
-        private readonly string _connectionString;
-
-        public List<User> GetAll()
-        {
-            List<User> users = new List<User>();
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (SqlCommand command = new SqlCommand("""
+        private const string SelectAllUserQuery = """
                     SELECT UserId,
                            UserName,
                            DoteofBirth,
@@ -28,39 +20,8 @@ namespace GameLibraryData.Repository
                            DateCreated,
                            Email
                     FROM dbo.Users;
-                    """, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            User user = new User
-                            {
-                                UserId = reader.GetInt32(0),
-                                UserName = reader.GetString(1),
-                                DateofBirth = reader.GetDateTime(2),
-                                Password = reader.GetString(3),
-                                Region = reader.GetString(4),
-                                Bios = reader.GetString(5),
-                                DateCreated = reader.GetDateTime(6),
-                                Email = reader.GetString(7),
-                            };
-                            users.Add(user);
-                        }
-                    }
-                }
-                connection.Dispose();
-            }
-            return users;
-        }
-
-        public User GetById(int id)
-        {
-            User user = new User();
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-                using (SqlCommand command = new SqlCommand("""
+                    """;
+        private const string SelectUserByIdQuery = """
                     SELECT UserId,
                            Username,
                            DateofBirth,
@@ -71,31 +32,79 @@ namespace GameLibraryData.Repository
                            Email
                     FROM dbo.Users
                     WHERE UserId = @Id;
-                    """, connection))
+                    """;
+        private readonly string _connectionString;
+        public List<User> GetAll()
+        {
+            List<User> users = new List<User>();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    command.Parameters.AddWithValue("@Id", id);
-
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SelectAllUserQuery, connection))
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        if (reader.Read())
+                        while (reader.Read())
                         {
-                            user = new User
-                            {
-                                UserId = reader.GetInt32(0),
-                                UserName = reader.GetString(1),
-                                DateofBirth = reader.GetDateTime(2),
-                                Password = reader.GetString(3),
-                                Region = reader.GetString(4),
-                                Bios = reader.GetString(5),
-                                DateCreated = reader.GetDateTime(6),
-                                Email = reader.GetString(7),
-                            };
+                            User user = ReadUser(reader);
+                            users.Add(user);
                         }
                     }
                 }
-                connection.Dispose();
+                return users;
             }
-            return user;
+            catch (SqlException exception)
+            {
+                throw new Exception($$"""
+                    Database error while loading users.
+                    Message: {{exception.Message}}
+                    """);
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Unexpected error while loading users.
+                    Message: {{exception.Message}}
+                    """);
+            }
+        }
+        public User GetById(int id)
+        {
+            User user = new User();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SelectUserByIdQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id", id);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                user = ReadUser(reader);
+                            }
+                        }
+                    }
+                }
+                return user;
+            }
+            catch (SqlException exception)
+            {
+                throw new Exception($$"""
+                    Database error while loading users.
+                    Message: {{exception.Message}}
+                    """);
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Unexpected error while loading users.
+                    Message: {{exception.Message}}
+                    """);
+            }
         }
 
         public User GetByName(string name)
@@ -111,6 +120,20 @@ namespace GameLibraryData.Repository
         public int Delete(int id)
         {
             throw new NotImplementedException();
+        }
+        private User ReadUser(SqlDataReader reader)
+        {
+            return new User
+            {
+                UserId = reader.GetInt32(0),
+                UserName = reader.GetString(1),
+                DateofBirth = reader.GetDateTime(2),
+                Password = reader.GetString(3),
+                Region = reader.GetString(4),
+                Bios = reader.GetString(5),
+                DateCreated = reader.GetDateTime(6),
+                Email = reader.GetString(7),
+            };
         }
     }
 }

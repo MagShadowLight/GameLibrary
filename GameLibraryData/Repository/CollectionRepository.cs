@@ -13,6 +13,16 @@ namespace GameLibraryData.Repository
     public class CollectionRepository : IDataAccess<Collection>
     {
         private readonly string _connectionString;
+        private const string SelectAllCollectionQueryWithJoin = """
+                SELECT
+                c.CollectionId, c.UserId, c.GameId, c.DateLastPlayed, c.TimesPlayed,
+                u.UserName, u.DateofBirth, u.Password, u.Region, u.Bios, u.DateCreated, u.Email,
+                g.Title, g.Developer, g.Publisher, g.ReleaseDate, g.Genre, g.Prices
+                FROM dbo.Collection c
+                JOIN dbo.Users u ON c.UserId = u.UserId
+                JOIN dbo.Games g ON c.GameId = g.GameId
+                ORDER BY c.CollectionId, u.UserId, g.GameId
+                """;
         public int CommandCount { get; set; }
 
         public CollectionRepository(string connectionString)
@@ -143,77 +153,52 @@ namespace GameLibraryData.Repository
         public List<Collection> GetAll()
         {
             CommandCount = 0;
-            string Query = """
-                SELECT
-                c.CollectionId, c.UserId, c.GameId, c.DateLastPlayed, c.TimesPlayed,
-                u.UserName, u.DateofBirth, u.Password, u.Region, u.Bios, u.DateCreated, u.Email,
-                g.Title, g.Developer, g.Publisher, g.ReleaseDate, g.Genre, g.Prices
-                FROM dbo.Collection c
-                JOIN dbo.Users u ON c.UserId = u.UserId
-                JOIN dbo.Games g ON c.GameId = g.GameId
-                ORDER BY c.CollectionId, u.UserId, g.GameId
-                """;
+            string Query = SelectAllCollectionQueryWithJoin;
             Dictionary<int, Collection> collections = new Dictionary<int, Collection>();
-
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            try
             {
-                connection.Open();
-
-                using (SqlCommand command = CreateCommand(Query, connection))
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
+                    connection.Open();
+                    using (SqlCommand command = CreateCommand(Query, connection))
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             int collectionId = reader.GetInt32(0);
-                            
+
                             if (!collections.TryGetValue(collectionId, out Collection collection))
                             {
-                                collection = new Collection
-                                {
-                                    CollectionId = collectionId,
-                                    UserId = reader.GetInt32(1),
-                                    GameId = reader.GetInt32(2),
-                                    DateLastPlayed = reader.GetDateTime(3),
-                                    TimesPlayed = reader.GetInt32(4)
-                                };
-
+                                collection = ReadCollection(reader, collectionId);
                                 collections.Add(collectionId, collection);
                             }
                             if (!reader.IsDBNull(5))
                             {
-                                collection.users.Add(new User
-                                {
-                                    UserId = reader.GetInt32(1),
-                                    CollectionId = collectionId,
-                                    UserName = reader.GetString(5),
-                                    DateofBirth = reader.GetDateTime(6),
-                                    Password = reader.GetString(7),
-                                    Region = reader.GetString(8),
-                                    Bios = reader.GetString(9),
-                                    DateCreated = reader.GetDateTime(10),
-                                    Email = reader.GetString(11),
-                                });
+                                collection.users.Add(ReadUser(reader, collectionId));
                             }
                             if (!reader.IsDBNull(12))
                             {
-                                collection.games.Add(new Games
-                                {
-                                    GameId = reader.GetInt32(2),
-                                    CollectionId = collectionId,
-                                    Title = reader.GetString(12),
-                                    Developer = reader.GetString(13),
-                                    Publisher = reader.GetString(14),
-                                    ReleaseDate = reader.GetDateTime(15),
-                                    Genre = reader.GetString(16),
-                                    UnitPrice = reader.GetDecimal(17)
-                                });
+                                collection.games.Add(ReadGames(reader, collectionId));
                             }
                         }
                     }
                 }
+                return new List<Collection>(collections.Values);
             }
-            return new List<Collection>(collections.Values);
+            catch (SqlException exception)
+            {
+                throw new Exception($$"""
+                    Database error while loading collections.
+                    Message: {{exception.Message}}
+                    """);
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Unexpected error while loading collections.
+                    Message: {{exception.Message}}
+                    """);
+            }
         }
         
 
@@ -235,6 +220,46 @@ namespace GameLibraryData.Repository
         public int Delete(int id)
         {
             throw new NotImplementedException();
+        }
+        private Collection ReadCollection(SqlDataReader reader, int collectionId)
+        {
+            return new Collection
+            {
+                CollectionId = collectionId,
+                UserId = reader.GetInt32(1),
+                GameId = reader.GetInt32(2),
+                DateLastPlayed = reader.GetDateTime(3),
+                TimesPlayed = reader.GetInt32(4)
+            };
+        }
+        private User ReadUser(SqlDataReader reader, int collectionId)
+        {
+            return new User
+            {
+                UserId = reader.GetInt32(1),
+                CollectionId = collectionId,
+                UserName = reader.GetString(5),
+                DateofBirth = reader.GetDateTime(6),
+                Password = reader.GetString(7),
+                Region = reader.GetString(8),
+                Bios = reader.GetString(9),
+                DateCreated = reader.GetDateTime(10),
+                Email = reader.GetString(11),
+            };
+        }
+        private Games ReadGames(SqlDataReader reader, int collectionId)
+        {
+            return new Games
+            {
+                GameId = reader.GetInt32(2),
+                CollectionId = collectionId,
+                Title = reader.GetString(12),
+                Developer = reader.GetString(13),
+                Publisher = reader.GetString(14),
+                ReleaseDate = reader.GetDateTime(15),
+                Genre = reader.GetString(16),
+                UnitPrice = reader.GetDecimal(17)
+            };
         }
     }
 }
