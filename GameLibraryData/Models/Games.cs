@@ -9,6 +9,7 @@ namespace GameLibraryData.Models
     public class Games
     {
         public int GameId { get; set; }
+        public int CollectionId { get; set; }
         public string Title { get; set; }
         public string Developer { get; set; }
         public string Publisher { get; set; }

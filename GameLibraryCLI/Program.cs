@@ -2,6 +2,7 @@
 using GameLibraryCLI.Utils;
 using GameLibraryData.Models;
 using GameLibraryData.Repository;
+using System.Diagnostics;
 
 namespace GameLibraryCLI
 {
@@ -12,26 +13,81 @@ namespace GameLibraryCLI
         private static GamesRepository _repo = new GamesRepository(_ConnectionString);
         static void Main(string[] args)
         {
-            List<Games> games = GetAllGames();
-            PrintListOfGames(games);
-            PrintMessage("Press any key to get game from id");
-            Games game = GetGameById(games);
-            PrintGame(game);
-            PrintMessage("Press any key to get game from title");
-            game = GetGameByTitle();
-            PrintGame(game);
-            PrintMessage("Press any key to update game");
-            int rowAffected = UpdateGame(game, games);
-            if (rowAffected >= 0)
-                Console.WriteLine($"Number of row updated: {rowAffected}");
-            PrintMessage("Press any key to delete game");
-            rowAffected = DeleteGame(games);
-            if (rowAffected >= 0)
-                Console.WriteLine($"Number of row deleted: {rowAffected}");
-            PrintMessage("Press any key to use transaction");
-            string result = UseTransaction(games);
-            Console.WriteLine(result);
-            PrintMessage("Press any key to Exit");
+            ConsoleColors.ChangeColor(ConsoleColor.Blue, ConsoleColor.White);
+            CollectionRepository repo = new CollectionRepository(_ConnectionString);
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            List<Collection> collections;
+            collections = repo.GetAll();
+            timer.Stop();
+            Console.WriteLine($$"""
+                Get all collection of games user have owned:
+                Time={{timer.ElapsedMilliseconds}} ms
+                Command Count={{repo.CommandCount}}
+                """);
+            Console.ReadKey();
+            Console.WriteLine();
+            Console.WriteLine("Collections: ");
+            foreach (var collection in collections)
+            {
+                Console.WriteLine($$"""
+                    Id={{collection.CollectionId}}
+                    GameId={{collection.GameId}}
+                    UserId={{collection.UserId}}
+                    DateLastPlayed={{collection.DateLastPlayed}}
+                    TimesPlayed={{collection.TimesPlayed}}
+                    """);
+                Console.WriteLine("Games:");
+                foreach (var game in collection.games)
+                {
+                    Console.WriteLine($$"""
+                        GameId={{game.GameId}}
+                        Title={{game.Title}}
+                        Developer={{game.Developer}}
+                        Publisher={{game.Publisher}}
+                        ReleaseDate={{game.ReleaseDate}}
+                        Genre={{game.Genre}}
+                        Price={{game.UnitPrice}}
+                        """);
+                }
+                Console.WriteLine("Users:");
+                foreach(var user in collection.users)
+                {
+                    Console.WriteLine($$"""
+                        UserId={{user.UserId}}
+                        UserName={{user.UserName}}
+                        DateofBirth={{user.DateofBirth}}
+                        Password={{user.Password}}
+                        Region={{user.Region}}
+                        Bios={{user.Bios}}
+                        DateCreated={{user.DateCreated}}
+                        Email={{user.Email}}
+                        """);
+                }
+                Console.ReadLine();
+            }
+
+            // Previous Week
+            //List<Games> games = GetAllGames();
+            //PrintListOfGames(games);
+            //PrintMessage("Press any key to get game from id");
+            //Games game = GetGameById(games);
+            //PrintGame(game);
+            //PrintMessage("Press any key to get game from title");
+            //game = GetGameByTitle();
+            //PrintGame(game);
+            //PrintMessage("Press any key to update game");
+            //int rowAffected = UpdateGame(game, games);
+            //if (rowAffected >= 0)
+            //    Console.WriteLine($"Number of row updated: {rowAffected}");
+            //PrintMessage("Press any key to delete game");
+            //rowAffected = DeleteGame(games);
+            //if (rowAffected >= 0)
+            //    Console.WriteLine($"Number of row deleted: {rowAffected}");
+            //PrintMessage("Press any key to use transaction");
+            //string result = UseTransaction(games);
+            //Console.WriteLine(result);
+            //PrintMessage("Press any key to Exit");
             ConsoleColors.ChangeColor(ConsoleColor.Black, ConsoleColor.Gray);
         }
 
