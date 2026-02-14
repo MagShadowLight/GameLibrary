@@ -11,7 +11,7 @@ namespace GameLibraryData.Repository
                 c.CollectionId, c.UserId, c.GameId, c.DateLastPlayed, c.TimesPlayed,
                 u.UserName, u.DateofBirth, u.Password, u.Region, u.Bios, u.DateCreated, u.Email,
                 g.Title, g.Developer, g.Publisher, g.ReleaseDate, g.Genre, g.Prices
-                FROM dbo.Collection c
+                FROM dbo.Collections c
                 JOIN dbo.Users u ON c.UserId = u.UserId
                 JOIN dbo.Games g ON c.GameId = g.GameId
                 ORDER BY c.CollectionId, u.UserId, g.GameId
@@ -160,7 +160,7 @@ namespace GameLibraryData.Repository
                         {
                             int collectionId = reader.GetInt32(0);
 
-                            if (!collections.TryGetValue(collectionId, out Collection collection))
+                            if (!collections.TryGetValue(collectionId, out Collection? collection))
                             {
                                 collection = ReadCollection(reader, collectionId);
                                 collections.Add(collectionId, collection);
@@ -230,7 +230,6 @@ namespace GameLibraryData.Repository
             return new User
             {
                 UserId = reader.GetInt32(1),
-                CollectionId = collectionId,
                 UserName = reader.GetString(5),
                 DateofBirth = reader.GetDateTime(6),
                 Password = reader.GetString(7),
@@ -245,7 +244,6 @@ namespace GameLibraryData.Repository
             return new Games
             {
                 GameId = reader.GetInt32(2),
-                CollectionId = collectionId,
                 Title = reader.GetString(12),
                 Developer = reader.GetString(13),
                 Publisher = reader.GetString(14),

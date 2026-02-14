@@ -9,14 +9,13 @@ namespace GameLibraryData.Models
     public class User
     {
         public int UserId { get; set; }
-        public int CollectionId { get; set; }
-        public string UserName { get; set; }
+        public string UserName { get; set; } = string.Empty;
         public DateTime DateofBirth { get; set; }
         // for placeholder, never store those in plain text
-        public string Password { get; set; }
-        public string Region { get; set; }
-        public string Bios { get; set; }
+        public string Password { get; set; } = string.Empty;
+        public string Region { get; set; } = string.Empty;
+        public string Bios { get; set; } = string.Empty;
         public DateTime DateCreated { get; set; } = DateTime.Now;
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
     }
 }

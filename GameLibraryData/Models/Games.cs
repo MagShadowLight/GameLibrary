@@ -9,12 +9,11 @@ namespace GameLibraryData.Models
     public class Games
     {
         public int GameId { get; set; }
-        public int CollectionId { get; set; }
-        public string Title { get; set; }
-        public string Developer { get; set; }
-        public string Publisher { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Developer { get; set; } = string.Empty;
+        public string Publisher { get; set; } = string.Empty;
         public DateTime ReleaseDate { get; set; }
-        public string Genre { get; set; }
+        public string Genre { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
     }
 }
