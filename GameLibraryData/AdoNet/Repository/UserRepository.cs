@@ -1,9 +1,10 @@
-﻿using GameLibraryData.Models;
+﻿using GameLibraryData.AdoNet.Models;
+using GameLibraryData.Interface;
 using Microsoft.Data.SqlClient;
 
-namespace GameLibraryData.Repository
+namespace GameLibraryData.AdoNet.Repository
 {
-    public class UserRepository : IDataAccess<User>
+    public class UserRepository : IDataAccess<Users>
     {
         private const string SelectAllUserQuery = """
                     SELECT UserId,
@@ -29,9 +30,9 @@ namespace GameLibraryData.Repository
                     WHERE UserId = @Id;
                     """;
         private readonly string _connectionString;
-        public List<User> GetAll()
+        public List<Users> GetAll()
         {
-            List<User> users = new List<User>();
+            List<Users> users = new List<Users>();
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -42,7 +43,7 @@ namespace GameLibraryData.Repository
                     {
                         while (reader.Read())
                         {
-                            User user = ReadUser(reader);
+                            Users user = ReadUser(reader);
                             users.Add(user);
                         }
                     }
@@ -64,9 +65,9 @@ namespace GameLibraryData.Repository
                     """);
             }
         }
-        public User GetById(int id)
+        public Users GetById(int id)
         {
-            User user = new User();
+            Users user = new Users();
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -102,12 +103,12 @@ namespace GameLibraryData.Repository
             }
         }
 
-        public User GetByName(string name)
+        public Users GetByName(string name)
         {
             throw new NotImplementedException();
         }
 
-        public int Update(User entity)
+        public int Update(Users entity)
         {
             throw new NotImplementedException();
         }
@@ -116,9 +117,9 @@ namespace GameLibraryData.Repository
         {
             throw new NotImplementedException();
         }
-        private User ReadUser(SqlDataReader reader)
+        private Users ReadUser(SqlDataReader reader)
         {
-            return new User
+            return new Users
             {
                 UserId = reader.GetInt32(0),
                 UserName = reader.GetString(1),

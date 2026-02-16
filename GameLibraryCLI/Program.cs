@@ -1,7 +1,9 @@
 ﻿using GameLibraryCLI.Exceptions;
 using GameLibraryCLI.Utils;
-using GameLibraryData.Models;
-using GameLibraryData.Repository;
+using GameLibraryData.AdoNet.Models;
+using GameLibraryData.AdoNet.Repository;
+using GameLibraryData.EfCore.Controllers;
+using GameLibraryData.EfCore.Entities;
 using System.Diagnostics;
 
 namespace GameLibraryCLI
@@ -11,61 +13,118 @@ namespace GameLibraryCLI
         
         private static string _ConnectionString = "Server=localhost;Database=GameLibrary;Trusted_Connection=True;TrustServerCertificate=True;";
         private static GamesRepository _repo = new GamesRepository(_ConnectionString);
+        private static GamesController _gamesController = new GamesController();
+        private static UsersController _userController = new UsersController();
+        private static CollectionsController _collectionsController = new CollectionsController();
+        static int GamesCount = _gamesController.GetAll().Count;
+        static int UsersCount = _userController.GetAll().Count;
+        static int CollectionCount = _collectionsController.GetAll().Count;
         static void Main(string[] args)
         {
             ConsoleColors.ChangeColor(ConsoleColor.Blue, ConsoleColor.White);
-            CollectionRepository repo = new CollectionRepository(_ConnectionString);
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
-            List<Collection> collections;
-            collections = repo.GetAll();
-            timer.Stop();
-            Console.WriteLine($$"""
-                Get all collection of games user have owned:
-                Time={{timer.ElapsedMilliseconds}} ms
-                Command Count={{repo.CommandCount}}
-                """);
+            // Week 6:
+            // Games:
+
+            Console.WriteLine("Starting Game Library App");
+            Console.WriteLine("Press any key to get all games");
             Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine("Collections: ");
-            foreach (var collection in collections)
-            {
-                Console.WriteLine($$"""
-                    Id={{collection.CollectionId}}
-                    GameId={{collection.GameId}}
-                    UserId={{collection.UserId}}
-                    DateLastPlayed={{collection.DateLastPlayed}}
-                    TimesPlayed={{collection.TimesPlayed}}
-                    """);
-                Console.WriteLine("Games:");
-                foreach (var game in collection.games)
-                {
-                    Console.WriteLine($$"""
-                        GameId={{game.GameId}}
-                        Title={{game.Title}}
-                        Developer={{game.Developer}}
-                        Publisher={{game.Publisher}}
-                        ReleaseDate={{game.ReleaseDate}}
-                        Genre={{game.Genre}}
-                        Price={{game.UnitPrice}}
-                        """);
-                }
-                Console.WriteLine("Users:");
-                foreach(var user in collection.users)
-                {
-                    Console.WriteLine($$"""
-                        UserId={{user.UserId}}
-                        UserName={{user.UserName}}
-                        DateofBirth={{user.DateofBirth}}
-                        Password={{user.Password}}
-                        Region={{user.Region}}
-                        Bios={{user.Bios}}
-                        DateCreated={{user.DateCreated}}
-                        Email={{user.Email}}
-                        """);
-                }
-                Console.ReadLine();
-            }
+            Console.Clear();
+            GetAllGamesEFCore();
+            Console.WriteLine("Press any key to get game by Id");
+            Console.ReadKey();
+            Console.Clear();
+            Console.WriteLine($"Enter the number between 1 and {GamesCount}");
+            if (int.TryParse(Console.ReadLine(), out int gameId))
+                GetGameByIdEFCore(gameId);
+            else
+                Console.WriteLine($"Failed to parse the number");
+
+            // Users:
+
+            Console.WriteLine("Press any key to get all users");
+            Console.ReadKey();
+            Console.Clear();
+            GetAllUsersEFCore();
+            Console.WriteLine("Press any key to get user by Id");
+            Console.ReadKey();
+            Console.Clear();
+            Console.WriteLine($"Enter the number between 1 and {UsersCount}");
+            if (int.TryParse(Console.ReadLine(), out int userId))
+                GetUserByIdEFCore(userId);
+            else
+                Console.WriteLine($"Failed to parse the number");
+
+            // Collections:
+
+            Console.WriteLine("Press any key to get all collections");
+            Console.ReadKey();
+            Console.Clear();
+            GetAllCollectionsEFCore();
+            Console.WriteLine("Press any key to get collection by Id");
+            Console.ReadKey();
+            Console.Clear();
+            Console.WriteLine($"Enter the number between 1 and {CollectionCount}");
+            if (int.TryParse(Console.ReadLine(), out int collectionId))
+                GetCollectionByIdEFCore(collectionId);
+            else
+                Console.WriteLine($"Failed to parse the number");
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
+
+
+            // Week 5:
+            //CollectionRepository repo = new CollectionRepository(_ConnectionString);
+            //Stopwatch timer = new Stopwatch();
+            //timer.Start();
+            //List<Collection> collections;
+            //collections = repo.GetAll();
+            //timer.Stop();
+            //Console.WriteLine($$"""
+            //    Get all collection of games user have owned:
+            //    Time={{timer.ElapsedMilliseconds}} ms
+            //    Command Count={{repo.CommandCount}}
+            //    """);
+            //Console.ReadKey();
+            //Console.WriteLine();
+            //Console.WriteLine("Collections: ");
+            //foreach (var collection in collections)
+            //{
+            //    Console.WriteLine($$"""
+            //        Id={{collection.CollectionId}}
+            //        GameId={{collection.GameId}}
+            //        UserId={{collection.UserId}}
+            //        DateLastPlayed={{collection.DateLastPlayed}}
+            //        TimesPlayed={{collection.TimesPlayed}}
+            //        """);
+            //    Console.WriteLine("Games:");
+            //    foreach (var game in collection.games)
+            //    {
+            //        Console.WriteLine($$"""
+            //            GameId={{game.GameId}}
+            //            Title={{game.Title}}
+            //            Developer={{game.Developer}}
+            //            Publisher={{game.Publisher}}
+            //            ReleaseDate={{game.ReleaseDate}}
+            //            Genre={{game.Genre}}
+            //            Price={{game.UnitPrice}}
+            //            """);
+            //    }
+            //    Console.WriteLine("Users:");
+            //    foreach(var user in collection.users)
+            //    {
+            //        Console.WriteLine($$"""
+            //            UserId={{user.UserId}}
+            //            UserName={{user.UserName}}
+            //            DateofBirth={{user.DateofBirth}}
+            //            Password={{user.Password}}
+            //            Region={{user.Region}}
+            //            Bios={{user.Bios}}
+            //            DateCreated={{user.DateCreated}}
+            //            Email={{user.Email}}
+            //            """);
+            //    }
+            //    Console.ReadLine();
+            //}
 
             // Previous Week
             //List<Games> games = GetAllGames();
@@ -89,6 +148,115 @@ namespace GameLibraryCLI
             //Console.WriteLine(result);
             //PrintMessage("Press any key to Exit");
             ConsoleColors.ChangeColor(ConsoleColor.Black, ConsoleColor.Gray);
+        }
+
+        private static void GetCollectionByIdEFCore(int id)
+        {
+            Console.WriteLine("Getting a collection by Id");
+            Collection collection = _collectionsController.GetById(id);
+            Console.WriteLine("Collection retrieved. Press any key to display it.");
+            Console.ReadKey();
+            Console.Clear();
+            string result = PrintCollection(collection);
+            Console.WriteLine(result);
+        }
+
+        private static void GetAllCollectionsEFCore()
+        {
+            Console.WriteLine("Getting all collections");
+            List<Collection> collections = _collectionsController.GetAll();
+            Console.WriteLine($$"""
+                all collections retrieved.
+                Count of collections: {{collections.Count}}
+                Press any key to display all collections.
+                """);
+            Console.ReadKey();
+            Console.Clear();
+            foreach (Collection collection in collections)
+            {
+                string result = PrintCollection(collection);
+                Console.WriteLine(result);
+                Thread.Sleep(1500);
+            }
+        }
+
+        private static string PrintCollection(Collection collection)
+        {
+            return $$"""
+                    CollectionId={{collection.CollectionId}}
+                    UserId={{collection.UserId}}
+                    GameId={{collection.GameId}}
+                    DateLastPlayed={{collection.DateLastPlayed}}
+                    TimesPlayed={{collection.TimesPlayed}}
+                    """;
+        }
+
+        private static void GetUserByIdEFCore(int id)
+        {
+            Console.WriteLine("Getting a user by Id");
+            User user = _userController.GetById(id);
+            Console.WriteLine("User retrieved. Press any key to display it.");
+            Console.ReadKey();
+            Console.Clear();
+            string result = PrintUsers(user);
+            Console.WriteLine(result);
+        }
+
+        private static void GetAllUsersEFCore()
+        {
+            Console.WriteLine("Getting all users");
+            List<User> users = _userController.GetAll();
+            Console.WriteLine($$"""
+                all users retrieved.
+                Count of users: {{users.Count}}
+                Press any key to display all users.
+                """);
+            Console.ReadKey();
+            Console.Clear();
+            foreach (User user in users)
+            {
+                string result = PrintUsers(user);
+                Console.WriteLine(result);
+                Thread.Sleep(1500);
+            }
+        }
+
+        private static string PrintUsers(User user)
+        {
+            return $$"""
+                    UserId={{user.UserId}}
+                    UserName={{user.UserName}}
+                    DateOfBirth={{user.DateofBirth}}
+                    Password={{user.Password}}
+                    Region={{user.Region}}
+                    Bios={{user.Bios}}
+                    DateCreated={{user.DateCreated}}
+                    Email={{user.Email}}
+                    """;
+        }
+
+        private static void GetGameByIdEFCore(int id)
+        {
+            Console.WriteLine("Getting a game by Id");
+            Game game = _gamesController.GetById(id);
+            Console.WriteLine("Game retrieved. Press any key to display it.");
+            Console.ReadKey();
+            Console.Clear();
+            PrintGame(game);
+        }
+
+        private static void GetAllGamesEFCore()
+        {
+            Console.WriteLine("Getting all games");
+            List<Game> games = _gamesController.GetAll();
+            Console.WriteLine($$"""
+                all games retrieved.
+                Count of games: {{games.Count}}
+                Press any key to display all games.
+                """);
+            Console.ReadKey();
+            Console.Clear();
+            PrintListOfGames(games);
         }
 
         private static string UseTransaction(List<Games> games)
@@ -250,6 +418,18 @@ namespace GameLibraryCLI
                     Price={{game.UnitPrice}}
                     """);
         }
+        private static void PrintGame(Game game)
+        {
+            Console.WriteLine($$"""
+                    Id={{game.GameId}}
+                    Title={{game.Title}}
+                    Developer={{game.Developer}}
+                    Publisher={{game.Publisher}}
+                    Release Date={{game.ReleaseDate}}
+                    Genre={{game.Genre}}
+                    Price={{game.Prices}}
+                    """);
+        }
 
         private static void PrintListOfGames(List<Games> games)
         {
@@ -263,6 +443,22 @@ namespace GameLibraryCLI
                     Release Date={{game.ReleaseDate}}
                     Genre={{game.Genre}}
                     Price={{game.UnitPrice}}
+                    """);
+                Thread.Sleep(1500);
+            }
+        }
+        private static void PrintListOfGames(List<Game> games)
+        {
+            foreach (Game game in games)
+            {
+                Console.WriteLine($$"""
+                    Id={{game.GameId}}
+                    Title={{game.Title}}
+                    Developer={{game.Developer}}
+                    Publisher={{game.Publisher}}
+                    Release Date={{game.ReleaseDate}}
+                    Genre={{game.Genre}}
+                    Price={{game.Prices}}
                     """);
                 Thread.Sleep(1500);
             }

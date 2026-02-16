@@ -1,9 +1,10 @@
-﻿using GameLibraryData.Models;
+﻿using GameLibraryData.AdoNet.Models;
+using GameLibraryData.Interface;
 using Microsoft.Data.SqlClient;
 
-namespace GameLibraryData.Repository
+namespace GameLibraryData.AdoNet.Repository
 {
-    public class CollectionRepository : IDataAccess<Collection>
+    public class CollectionRepository : IDataAccess<Collections>
     {
         private readonly string _connectionString;
         private const string SelectAllCollectionQueryWithJoin = """
@@ -143,11 +144,11 @@ namespace GameLibraryData.Repository
         */
         // After Refactor
         
-        public List<Collection> GetAll()
+        public List<Collections> GetAll()
         {
             CommandCount = 0;
             string Query = SelectAllCollectionQueryWithJoin;
-            Dictionary<int, Collection> collections = new Dictionary<int, Collection>();
+            Dictionary<int, Collections> collections = new Dictionary<int, Collections>();
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -160,7 +161,7 @@ namespace GameLibraryData.Repository
                         {
                             int collectionId = reader.GetInt32(0);
 
-                            if (!collections.TryGetValue(collectionId, out Collection? collection))
+                            if (!collections.TryGetValue(collectionId, out Collections? collection))
                             {
                                 collection = ReadCollection(reader, collectionId);
                                 collections.Add(collectionId, collection);
@@ -176,7 +177,7 @@ namespace GameLibraryData.Repository
                         }
                     }
                 }
-                return new List<Collection>(collections.Values);
+                return new List<Collections>(collections.Values);
             }
             catch (SqlException exception)
             {
@@ -195,17 +196,17 @@ namespace GameLibraryData.Repository
         }
         
 
-        public Collection GetById(int id)
+        public Collections GetById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Collection GetByName(string name)
+        public Collections GetByName(string name)
         {
             throw new NotImplementedException();
         }
 
-        public int Update(Collection entity)
+        public int Update(Collections entity)
         {
             throw new NotImplementedException();
         }
@@ -214,9 +215,9 @@ namespace GameLibraryData.Repository
         {
             throw new NotImplementedException();
         }
-        private Collection ReadCollection(SqlDataReader reader, int collectionId)
+        private Collections ReadCollection(SqlDataReader reader, int collectionId)
         {
-            return new Collection
+            return new Collections
             {
                 CollectionId = collectionId,
                 UserId = reader.GetInt32(1),
@@ -225,9 +226,9 @@ namespace GameLibraryData.Repository
                 TimesPlayed = reader.GetInt32(4)
             };
         }
-        private User ReadUser(SqlDataReader reader, int collectionId)
+        private Users ReadUser(SqlDataReader reader, int collectionId)
         {
-            return new User
+            return new Users
             {
                 UserId = reader.GetInt32(1),
                 UserName = reader.GetString(5),

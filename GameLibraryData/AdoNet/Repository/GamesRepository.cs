@@ -1,7 +1,8 @@
-﻿using GameLibraryData.Models;
+﻿using GameLibraryData.AdoNet.Models;
+using GameLibraryData.Interface;
 using Microsoft.Data.SqlClient;
 
-namespace GameLibraryData.Repository
+namespace GameLibraryData.AdoNet.Repository
 {
     public class GamesRepository : IDataAccess<Games>
     {

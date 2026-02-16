@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameLibraryData
+namespace GameLibraryData.Interface
 {
     public interface IDataAccess<T>
     {
