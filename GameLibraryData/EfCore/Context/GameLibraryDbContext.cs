@@ -30,13 +30,19 @@ public partial class GameLibraryDbContext : DbContext
     {
         modelBuilder.Entity<Collection>(entity =>
         {
-            entity.HasOne(d => d.Game).WithMany(p => p.Collections)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Collections_Games");
+            entity
+                .HasOne(d => d.Game)
+                .WithMany(p => p.Collections)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Collections_Games")
+                .HasForeignKey(t => t.GameId);
 
-            entity.HasOne(d => d.User).WithMany(p => p.Collections)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Collections_Users");
+            entity
+                .HasOne(d => d.User)
+                .WithMany(p => p.Collections)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Collections_Users")
+                .HasForeignKey(t => t.UserId);
         });
 
         OnModelCreatingPartial(modelBuilder);

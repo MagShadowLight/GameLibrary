@@ -24,18 +24,24 @@ namespace GameLibraryCLI
             Console.Title = "Game Library CLI";
             ConsoleColors.ChangeColor(ConsoleColor.Blue, ConsoleColor.White);
             Console.WriteLine("Starting Game Library App");
+            // Week 8:
+            Console.WriteLine("Getting the collection with both the user and game");
+            Collection collection = ReadCollection();
+            if (collection != null)
+                PrintCollectionWithRelatedData(collection);
+
             // Week 7:
-            Console.WriteLine("Inserting the game into Game Library");
-            InsertGameEFCore();
-            Thread.Sleep(1000);
-            Console.WriteLine("Press any key to update User");
-            Console.ReadKey();
-            Console.Clear();
-            UpdateUserEFCore();
-            Console.WriteLine("Press any key to delete game from the game library");
-            Console.ReadKey();
-            Console.Clear();
-            DeleteGameEFCore();
+            //Console.WriteLine("Inserting the game into Game Library");
+            //InsertGameEFCore();
+            //Thread.Sleep(1000);
+            //Console.WriteLine("Press any key to update User");
+            //Console.ReadKey();
+            //Console.Clear();
+            //UpdateUserEFCore();
+            //Console.WriteLine("Press any key to delete game from the game library");
+            //Console.ReadKey();
+            //Console.Clear();
+            //DeleteGameEFCore();
             
 
 
@@ -166,6 +172,41 @@ namespace GameLibraryCLI
             //Console.WriteLine(result);
             //PrintMessage("Press any key to Exit");
             ConsoleColors.ChangeColor(ConsoleColor.Black, ConsoleColor.Gray);
+        }
+
+        private static void PrintCollectionWithRelatedData(Collection collection)
+        {
+            Console.WriteLine($$"""
+                Collection Id={{collection.CollectionId}}
+                User Id={{collection.UserId}}
+                User:
+                    UserName={{collection.User.UserName}}
+                    Date of Birth={{collection.User.DateofBirth.ToString()}}
+                    Password={{collection.User.Password}}
+                    Region={{collection.User.Region}}
+                    Bios={{collection.User.Bios}}
+                    Date Created={{collection.User.DateCreated.ToString()}}
+                    Email={{collection.User.Email}}
+                Game Id={{collection.GameId}}
+                Game:
+                    Title={{collection.Game.Title}}
+                    Developer={{collection.Game.Developer}}
+                    Publisher={{collection.Game.Publisher}}
+                    Release Date={{collection.Game.ReleaseDate.ToString()}}
+                    Genre={{collection.Game.Genre}}
+                    Price={{collection.Game.Prices.ToString()}}
+                Date Last Played={{collection.DateLastPlayed}}
+                Times Played={{collection.TimesPlayed}}
+                """);
+        }
+
+        private static Collection ReadCollection()
+        {
+            int collectionCount = _collectionsController.GetAll().Count;
+            Console.WriteLine($"Enter the number between 1 and {collectionCount}");
+            int.TryParse(Console.ReadLine(), out int id);
+            Console.WriteLine($"Getting the collection by id: {id}");
+            return _collectionsController.GetCollectionWithRelationshipById(id);
         }
 
         private static void DeleteGameEFCore()

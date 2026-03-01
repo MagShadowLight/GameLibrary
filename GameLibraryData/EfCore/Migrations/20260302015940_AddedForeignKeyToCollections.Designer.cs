@@ -4,6 +4,7 @@ using GameLibraryData.EfCore.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameLibraryData.EfCore.Migrations
 {
     [DbContext(typeof(GameLibraryDbContext))]
-    partial class GameLibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260302015940_AddedForeignKeyToCollections")]
+    partial class AddedForeignKeyToCollections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

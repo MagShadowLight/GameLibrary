@@ -1,6 +1,7 @@
 ﻿using GameLibraryData.EfCore.Context;
 using GameLibraryData.EfCore.Entities;
 using GameLibraryData.Interface;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,6 +72,25 @@ namespace GameLibraryData.EfCore.Controllers
             {
                 Console.WriteLine(ex.Message);
                 return false;
+            }
+        }
+        public Collection GetCollectionWithRelationshipById(int id)
+        {
+            try
+            {
+                Collection? collection = _context.Collections
+                    .Include(g => g.Game)
+                    .Include(u => u.User)
+                    .FirstOrDefault(i => i.CollectionId == id);
+                if (collection == null)
+                {
+                    throw new Exception($"ERROR: Collection by Id: {id} is not found");
+                }
+                return collection;
+            } catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
             }
         }
     }
