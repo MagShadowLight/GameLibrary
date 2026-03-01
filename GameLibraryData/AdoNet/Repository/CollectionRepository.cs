@@ -253,5 +253,10 @@ namespace GameLibraryData.AdoNet.Repository
                 UnitPrice = reader.GetDecimal(17)
             };
         }
+
+        public bool Create(Collections entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

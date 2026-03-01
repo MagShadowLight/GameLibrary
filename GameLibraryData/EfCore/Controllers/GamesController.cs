@@ -30,11 +30,52 @@ namespace GameLibraryData.EfCore.Controllers
 
         public int Update(Game entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var tempEntity = _context.Games.Find(entity.GameId)!;
+                if (tempEntity == null)
+                    throw new Exception("Update failed. Game is not found");
+                tempEntity = entity;
+                int row = _context.SaveChanges();
+                return row;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -1;
+            }
         }
         public int Delete(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var games = _context.Games.Find(id);
+                if (games == null)
+                    throw new Exception("Delete failed. Game is not found");
+                _context.Games.Remove(games);
+                return _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -1;
+            }
+        }
+
+        public bool Create(Game entity)
+        {
+            try
+            {
+                _context.Games.Add(entity);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
     }
 }

@@ -25,11 +25,52 @@ namespace GameLibraryData.EfCore.Controllers
 
         public int Update(User entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var tempEntity = _context.Users.Find(entity.UserId)!;
+                if (tempEntity == null)
+                    throw new Exception("Update failed. User is not found");
+                tempEntity = entity;
+                int row = _context.SaveChanges();
+                return row;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -1;
+            }
         }
         public int Delete(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = _context.Users.Find(id);
+                if (user == null)
+                    throw new Exception("Delete failed. User is not found");
+                _context.Users.Remove(user);
+                return _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -1;
+            }
+        }
+
+        public bool Create(User entity)
+        {
+            try
+            {
+                _context.Users.Add(entity);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
     }
 }

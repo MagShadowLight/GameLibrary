@@ -15,5 +15,6 @@ namespace GameLibraryData.Interface
         public T GetByName(string name);
         public int Update(T entity);
         public int Delete(int id);
+        public bool Create(T entity);
     }
 }

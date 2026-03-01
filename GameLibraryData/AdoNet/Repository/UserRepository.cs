@@ -131,5 +131,10 @@ namespace GameLibraryData.AdoNet.Repository
                 Email = reader.GetString(7),
             };
         }
+
+        public bool Create(Users entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

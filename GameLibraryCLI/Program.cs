@@ -10,8 +10,8 @@ namespace GameLibraryCLI
 {
     internal class Program
     {
-        
-        private static string _ConnectionString = "Server=localhost;Database=GameLibrary;Trusted_Connection=True;TrustServerCertificate=True;";
+
+        private static string _ConnectionString = Encryptor.Decrypt("connectionstring.txt");
         private static GamesRepository _repo = new GamesRepository(_ConnectionString);
         private static GamesController _gamesController = new GamesController();
         private static UsersController _userController = new UsersController();
@@ -21,11 +21,29 @@ namespace GameLibraryCLI
         static int CollectionCount = _collectionsController.GetAll().Count;
         static void Main(string[] args)
         {
+            Console.Title = "Game Library CLI";
             ConsoleColors.ChangeColor(ConsoleColor.Blue, ConsoleColor.White);
+            Console.WriteLine("Starting Game Library App");
+            // Week 7:
+            Console.WriteLine("Inserting the game into Game Library");
+            InsertGameEFCore();
+            Thread.Sleep(1000);
+            Console.WriteLine("Press any key to update User");
+            Console.ReadKey();
+            Console.Clear();
+            UpdateUserEFCore();
+            Console.WriteLine("Press any key to delete game from the game library");
+            Console.ReadKey();
+            Console.Clear();
+            DeleteGameEFCore();
+            
+
+
+
             // Week 6:
             // Games:
 
-            Console.WriteLine("Starting Game Library App");
+
             Console.WriteLine("Press any key to get all games");
             Console.ReadKey();
             Console.Clear();
@@ -148,6 +166,90 @@ namespace GameLibraryCLI
             //Console.WriteLine(result);
             //PrintMessage("Press any key to Exit");
             ConsoleColors.ChangeColor(ConsoleColor.Black, ConsoleColor.Gray);
+        }
+
+        private static void DeleteGameEFCore()
+        {
+            try
+            {
+                var games = _gamesController.GetAll();
+                Console.WriteLine($"Enter the number between 1 and {games.Count}");
+                var result = int.TryParse(Console.ReadLine()!, out int gameId);
+                if (!result)
+                    throw new Exception("Delete failed. Failed to parse the game Id");
+                Console.WriteLine("Deleting the game");
+                int num = _gamesController.Delete(gameId);
+                if (num == 0)
+                    throw new Exception("Game deletion failed.");
+                Console.WriteLine("Game deleted successfully");
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return;
+            }
+        }
+
+        private static void UpdateUserEFCore()
+        {
+            try
+            {
+                var users = _userController.GetAll();
+                Console.WriteLine($"Enter the id of the user from 1 and {users.Count}");
+                var result = int.TryParse(Console.ReadLine()!, out int userId);
+                if (!result)
+                    throw new Exception("Update failed. Failed to parse the user Id");
+                var user = _userController.GetById(userId);
+                Console.WriteLine("Enter the Username");
+                user.UserName = Console.ReadLine()!;
+                Console.WriteLine("Enter the password");
+                user.Password = Console.ReadLine()!;
+                Console.WriteLine("Enter the region");
+                user.Region = Console.ReadLine()!;
+                Console.WriteLine("Enter the bios");
+                user.Bios = Console.ReadLine()!;
+                Console.WriteLine("Updating the user");
+                var num = _userController.Update(user);
+                if (num > 0)
+                    Console.WriteLine("User updated successfully");
+                Console.WriteLine("failed to update user");
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static void InsertGameEFCore()
+        {
+            try
+            {
+                Game game = new Game();
+                Console.WriteLine("Enter the title of the game");
+                game.Title = Console.ReadLine()!;
+                Console.WriteLine("Enter the developer of the game");
+                game.Developer = Console.ReadLine()!;
+                Console.WriteLine("Enter the publisher of the game");
+                game.Publisher = Console.ReadLine()!;
+                Console.WriteLine("Enter the release date of the game in yyyy-mm-dd");
+                bool result = DateTime.TryParse(Console.ReadLine()!, out DateTime releaseDate);
+                if (!result)
+                    throw new Exception("Failed to parse release date");
+                game.ReleaseDate = releaseDate;
+                Console.WriteLine("Enter the genre of the game");
+                game.Genre = Console.ReadLine()!;
+                Console.WriteLine("Enter the price of the game with two decimal point");
+                result = decimal.TryParse(Console.ReadLine()!, out decimal price);
+                if (!result)
+                    throw new Exception("Failed to parse price");
+                game.Prices = price;
+                result = _gamesController.Create(game);
+                if (!result)
+                    throw new Exception("Failed to create game.");
+                Console.WriteLine("Create game successfully");
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return;
+            }
         }
 
         private static void GetCollectionByIdEFCore(int id)

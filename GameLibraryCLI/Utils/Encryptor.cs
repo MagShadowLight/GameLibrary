@@ -15,7 +15,7 @@ namespace GameLibraryCLI.Utils
                     0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16
                 };
         private static byte[] _IV = [];
-        static string Decrypt(string path)
+        public static string Decrypt(string path)
         {
             string decrypted;
             using (FileStream fileStream = new(path, FileMode.Open))
