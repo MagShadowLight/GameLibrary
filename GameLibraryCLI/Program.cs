@@ -31,6 +31,7 @@ namespace GameLibraryCLI
                 PrintCollectionWithRelatedData(collection);
 
             // Week 7:
+            
             //Console.WriteLine("Inserting the game into Game Library");
             //InsertGameEFCore();
             //Thread.Sleep(1000);
@@ -250,9 +251,12 @@ namespace GameLibraryCLI
                 user.Bios = Console.ReadLine()!;
                 Console.WriteLine("Updating the user");
                 var num = _userController.Update(user);
-                if (num > 0)
-                    Console.WriteLine("User updated successfully");
-                Console.WriteLine("failed to update user");
+                if (num == 0)
+                {
+                    Console.WriteLine("failed to update user");
+                    return;
+                }
+                Console.WriteLine("User updated successfully");
             } catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
