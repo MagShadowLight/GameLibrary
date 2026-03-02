@@ -36,7 +36,7 @@ namespace GameLibraryCLI
             Console.ReadKey();
             Console.Clear();
             DeleteGameEFCore();
-            
+
 
 
 
@@ -209,9 +209,12 @@ namespace GameLibraryCLI
                 user.Bios = Console.ReadLine()!;
                 Console.WriteLine("Updating the user");
                 var num = _userController.Update(user);
-                if (num > 0)
-                    Console.WriteLine("User updated successfully");
-                Console.WriteLine("failed to update user");
+                if (num == 0)
+                {
+                    Console.WriteLine("failed to update user");
+                    return;
+                }
+                Console.WriteLine("User updated successfully");
             } catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
