@@ -10,7 +10,7 @@ namespace GameLibraryCLI
 {
     internal class Program
     {
-
+        // Connection String: "Server=localhost;Database=GameLibrary;Trusted_Connection=True;TrustServerCertificate=True;"
         private static string _ConnectionString = Encryptor.Decrypt("connectionstring.txt");
         private static GamesRepository _repo = new GamesRepository(_ConnectionString);
         private static GamesController _gamesController = new GamesController();
@@ -24,6 +24,7 @@ namespace GameLibraryCLI
             Console.Title = "Game Library CLI";
             ConsoleColors.ChangeColor(ConsoleColor.Blue, ConsoleColor.White);
             Console.WriteLine("Starting Game Library App");
+            Console.WriteLine(_ConnectionString);
             // Week 8:
             Console.WriteLine("Getting the collection with both the user and game");
             Collection collection = ReadCollection();
