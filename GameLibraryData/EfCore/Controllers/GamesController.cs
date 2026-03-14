@@ -1,6 +1,8 @@
 ﻿using GameLibraryData.EfCore.Context;
 using GameLibraryData.EfCore.Entities;
 using GameLibraryData.Interface;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,6 +78,20 @@ namespace GameLibraryData.EfCore.Controllers
                 Console.WriteLine(ex.Message);
                 return false;
             }
+        }
+        public List<Game> GetGamesByGenre(string genre)
+        {
+            return _context.Games
+                .FromSqlRaw("EXEC dbo.SelectGamesByGenre @Genre", new SqlParameter("@Genre", genre))
+                .ToList();
+        }
+
+        public int UpdateGameTitle(string genre, string title)
+        {
+            List<Game> games = GetGamesByGenre(genre);
+            Game game = games.First();
+            game.Title = title;
+            return _context.SaveChanges();
         }
     }
 }

@@ -25,11 +25,24 @@ namespace GameLibraryCLI
             ConsoleColors.ChangeColor(ConsoleColor.Blue, ConsoleColor.White);
             Console.WriteLine("Starting Game Library App");
             Console.WriteLine(_ConnectionString);
+            // Week 9:
+            Console.WriteLine("Getting the game by genre");
+            var games = _gamesController.GetGamesByGenre("Soul-like");
+            foreach (var game in games)
+            {
+                PrintGame(game);
+            }
+            Console.WriteLine("Press any key to update game by genre");
+            Console.ReadKey();
+            Console.WriteLine("Updating the game title by genre");
+            var result = _gamesController.UpdateGameTitle("Soul-like", "Updated Game");
+            Console.WriteLine($"Row affected: {result}");
+
             // Week 8:
-            Console.WriteLine("Getting the collection with both the user and game");
-            Collection collection = ReadCollection();
-            if (collection != null)
-                PrintCollectionWithRelatedData(collection);
+            //Console.WriteLine("Getting the collection with both the user and game");
+            //Collection collection = ReadCollection();
+            //if (collection != null)
+            //    PrintCollectionWithRelatedData(collection);
 
             // Week 7:
             
@@ -52,48 +65,48 @@ namespace GameLibraryCLI
             // Games:
 
 
-            Console.WriteLine("Press any key to get all games");
-            Console.ReadKey();
-            Console.Clear();
-            GetAllGamesEFCore();
-            Console.WriteLine("Press any key to get game by Id");
-            Console.ReadKey();
-            Console.Clear();
-            Console.WriteLine($"Enter the number between 1 and {GamesCount}");
-            if (int.TryParse(Console.ReadLine(), out int gameId))
-                GetGameByIdEFCore(gameId);
-            else
-                Console.WriteLine($"Failed to parse the number");
+            //Console.WriteLine("Press any key to get all games");
+            //Console.ReadKey();
+            //Console.Clear();
+            //GetAllGamesEFCore();
+            //Console.WriteLine("Press any key to get game by Id");
+            //Console.ReadKey();
+            //Console.Clear();
+            //Console.WriteLine($"Enter the number between 1 and {GamesCount}");
+            //if (int.TryParse(Console.ReadLine(), out int gameId))
+            //    GetGameByIdEFCore(gameId);
+            //else
+            //    Console.WriteLine($"Failed to parse the number");
 
-            // Users:
+            //// Users:
 
-            Console.WriteLine("Press any key to get all users");
-            Console.ReadKey();
-            Console.Clear();
-            GetAllUsersEFCore();
-            Console.WriteLine("Press any key to get user by Id");
-            Console.ReadKey();
-            Console.Clear();
-            Console.WriteLine($"Enter the number between 1 and {UsersCount}");
-            if (int.TryParse(Console.ReadLine(), out int userId))
-                GetUserByIdEFCore(userId);
-            else
-                Console.WriteLine($"Failed to parse the number");
+            //Console.WriteLine("Press any key to get all users");
+            //Console.ReadKey();
+            //Console.Clear();
+            //GetAllUsersEFCore();
+            //Console.WriteLine("Press any key to get user by Id");
+            //Console.ReadKey();
+            //Console.Clear();
+            //Console.WriteLine($"Enter the number between 1 and {UsersCount}");
+            //if (int.TryParse(Console.ReadLine(), out int userId))
+            //    GetUserByIdEFCore(userId);
+            //else
+            //    Console.WriteLine($"Failed to parse the number");
 
-            // Collections:
+            //// Collections:
 
-            Console.WriteLine("Press any key to get all collections");
-            Console.ReadKey();
-            Console.Clear();
-            GetAllCollectionsEFCore();
-            Console.WriteLine("Press any key to get collection by Id");
-            Console.ReadKey();
-            Console.Clear();
-            Console.WriteLine($"Enter the number between 1 and {CollectionCount}");
-            if (int.TryParse(Console.ReadLine(), out int collectionId))
-                GetCollectionByIdEFCore(collectionId);
-            else
-                Console.WriteLine($"Failed to parse the number");
+            //Console.WriteLine("Press any key to get all collections");
+            //Console.ReadKey();
+            //Console.Clear();
+            //GetAllCollectionsEFCore();
+            //Console.WriteLine("Press any key to get collection by Id");
+            //Console.ReadKey();
+            //Console.Clear();
+            //Console.WriteLine($"Enter the number between 1 and {CollectionCount}");
+            //if (int.TryParse(Console.ReadLine(), out int collectionId))
+            //    GetCollectionByIdEFCore(collectionId);
+            //else
+            //    Console.WriteLine($"Failed to parse the number");
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
 
