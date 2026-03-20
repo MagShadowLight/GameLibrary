@@ -1,4 +1,5 @@
 ﻿using GameLibraryData.AdoNet.Models;
+using GameLibraryData.AdoNet.Utils;
 using GameLibraryData.Interface;
 using Microsoft.Data.SqlClient;
 
@@ -6,30 +7,14 @@ namespace GameLibraryData.AdoNet.Repository
 {
     public class UserRepository : IDataAccess<Users>
     {
-        private const string SelectAllUserQuery = """
-                    SELECT UserId,
-                           UserName,
-                           DoteofBirth,
-                           Password,
-                           Region,
-                           Bios,
-                           DateCreated,
-                           Email
-                    FROM dbo.Users;
-                    """;
-        private const string SelectUserByIdQuery = """
-                    SELECT UserId,
-                           Username,
-                           DateofBirth,
-                           Password,
-                           Region,
-                           Bios,
-                           DateCreated,
-                           Email
-                    FROM dbo.Users
-                    WHERE UserId = @Id;
-                    """;
+        private UserQueries _queries = new UserQueries();
+        private UserReader _reader = new UserReader();
+        private UserParameters _parameters = new UserParameters();
         private readonly string _connectionString;
+        public UserRepository(string connectionstring)
+        {
+            _connectionString = connectionstring;
+        }
         public List<Users> GetAll()
         {
             List<Users> users = new List<Users>();
@@ -38,12 +23,12 @@ namespace GameLibraryData.AdoNet.Repository
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(SelectAllUserQuery, connection))
+                    using (SqlCommand command = new SqlCommand(_queries.SelectAllUserQuery, connection))
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Users user = ReadUser(reader);
+                            Users user = _reader.ReadUser(reader);
                             users.Add(user);
                         }
                     }
@@ -73,14 +58,14 @@ namespace GameLibraryData.AdoNet.Repository
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(SelectUserByIdQuery, connection))
+                    using (SqlCommand command = new SqlCommand(_queries.SelectUserByIdQuery, connection))
                     {
-                        command.Parameters.AddWithValue("@Id", id);
+                        _parameters.InitializeUserIdParameter(command, id);
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                user = ReadUser(reader);
+                                user = _reader.ReadUser(reader);
                             }
                         }
                     }
@@ -105,36 +90,123 @@ namespace GameLibraryData.AdoNet.Repository
 
         public Users GetByName(string name)
         {
-            throw new NotImplementedException();
+            Users user = new Users();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(_queries.SelectUserByUserNameQuery, connection))
+                    {
+                        _parameters.InitializeUserNameParameter(command, name);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                user = _reader.ReadUser(reader);
+                            }
+                        }
+                    }
+                }
+                return user;
+            }
+            catch (SqlException exception)
+            {
+                throw new Exception($$"""
+                    Database error while loading users.
+                    Message: {{exception.Message}}
+                    """);
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Unexpected error while loading users.
+                    Message: {{exception.Message}}
+                    """);
+            }
         }
 
         public int Update(Users entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(_queries.UpdateUserQuery, connection))
+                    {
+                        _parameters.InitializeUserParameter(command, entity);
+                        return command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException exception)
+            {
+                throw new Exception($$"""
+                    Database error while updating users.
+                    Message: {{exception.Message}}
+                    """);
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Unexpected error while updating users.
+                    Message: {{exception.Message}}
+                    """);
+            }
         }
 
         public int Delete(int id)
         {
-            throw new NotImplementedException();
-        }
-        private Users ReadUser(SqlDataReader reader)
-        {
-            return new Users
+            try
             {
-                UserId = reader.GetInt32(0),
-                UserName = reader.GetString(1),
-                DateofBirth = reader.GetDateTime(2),
-                Password = reader.GetString(3),
-                Region = reader.GetString(4),
-                Bios = reader.GetString(5),
-                DateCreated = reader.GetDateTime(6),
-                Email = reader.GetString(7),
-            };
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(_queries.DeleteUserQuery, connection))
+                    {
+                        _parameters.InitializeUserIdParameter(command, id);
+                        return command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException exception)
+            {
+                throw new Exception($$"""
+                    Database error while deleting users.
+                    Message: {{exception.Message}}
+                    """);
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Unexpected error while deleting users.
+                    Message: {{exception.Message}}
+                    """);
+            }
         }
-
         public bool Create(Users entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(_queries.InsertUserQuery, connection))
+                    {
+                        _parameters.InitializeInsertUserParameters(command, entity);
+                        int result = command.ExecuteNonQuery();
+                        return result > 0;
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Database error while inserting users.
+                    Message: {{exception.Message}}
+                    """);
+            }
         }
     }
 }

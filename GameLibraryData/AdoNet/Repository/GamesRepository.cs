@@ -1,4 +1,5 @@
 ﻿using GameLibraryData.AdoNet.Models;
+using GameLibraryData.AdoNet.Utils;
 using GameLibraryData.Interface;
 using Microsoft.Data.SqlClient;
 
@@ -6,59 +7,9 @@ namespace GameLibraryData.AdoNet.Repository
 {
     public class GamesRepository : IDataAccess<Games>
     {
-        private const string SelectAllGamesQuery = """
-                    SELECT GameId,
-                            Title,
-                            Developer,
-                            Publisher,
-                            ReleaseDate,
-                            Genre,
-                            Prices
-                    FROM dbo.Games;
-                    """;
-        private const string SelectGamesByIdQuery = """
-                    SELECT GameId,
-                            Title,
-                            Developer,
-                            Publisher,
-                            ReleaseDate,
-                            Genre,
-                            Prices
-                    FROM dbo.Games
-                    WHERE GameId = @Id;
-                    """;
-        private const string SelectGamesByNameQuery = """
-                    SELECT GameId,
-                            Title,
-                            Developer,
-                            Publisher,
-                            ReleaseDate,
-                            Genre,
-                            Prices
-                    FROM dbo.Games
-                    WHERE Title = @Title;
-                    """;
-        private const string UpdateGamesQuery = """
-                    Update dbo.Games
-                    SET Title = @Title,
-                        Developer = @Developer,
-                        Publisher = @Publisher,
-                        ReleaseDate = @ReleaseDate,
-                        Genre = @Genre,
-                        Prices = @Price
-                    WHERE GameId = @Id;
-                    """;
-        private const string DeleteGamesQuery = """
-                    DELETE FROM dbo.Games
-                    WHERE GameId = @Id;
-                    """;
-        private const string UpdateTitleAndGenreQuery = """
-                        UPDATE dbo.Games
-                        SET Title = @Title,
-                            Genre = @Genre
-                        WHERE GameId = @Id
-                        """;
-
+        private GameReader _reader = new GameReader();
+        private GameQueries _queries = new GameQueries();
+        private GameParameters _parameters = new GameParameters();
         private readonly string _connectionString;
         public GamesRepository(string collectionString)
         {
@@ -73,12 +24,12 @@ namespace GameLibraryData.AdoNet.Repository
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(SelectAllGamesQuery, connection))
+                    using (SqlCommand command = new SqlCommand(_queries.SelectAllGamesQuery, connection))
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Games game = ReadGames(reader);
+                            Games game = _reader.ReadGames(reader);
                             games.Add(game);
                         }
                     }
@@ -107,14 +58,14 @@ namespace GameLibraryData.AdoNet.Repository
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(SelectGamesByIdQuery, connection))
+                    using (SqlCommand command = new SqlCommand(_queries.SelectGamesByIdQuery, connection))
                     {
-                        command.Parameters.AddWithValue("@Id", id);
+                        _parameters.InitializeGameIdParameter(command, id);
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                game = ReadGames(reader);
+                                game = _reader.ReadGames(reader);
                             }
                         }
                     }
@@ -145,14 +96,14 @@ namespace GameLibraryData.AdoNet.Repository
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(SelectGamesByNameQuery, connection))
+                    using (SqlCommand command = new SqlCommand(_queries.SelectGamesByNameQuery, connection))
                     {
-                        command.Parameters.AddWithValue("@Title", name);
+                        _parameters.InitializeGameTitleParameter(command, name);
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                game = ReadGames(reader);
+                                game = _reader.ReadGames(reader);
                             }
                         }
                     }
@@ -182,15 +133,9 @@ namespace GameLibraryData.AdoNet.Repository
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(UpdateGamesQuery, connection))
+                    using (SqlCommand command = new SqlCommand(_queries.UpdateGamesQuery, connection))
                     {
-                        command.Parameters.AddWithValue("@Title", entity.Title);
-                        command.Parameters.AddWithValue("@Developer", entity.Developer);
-                        command.Parameters.AddWithValue("@Publisher", entity.Publisher);
-                        command.Parameters.AddWithValue("@ReleaseDate", entity.ReleaseDate);
-                        command.Parameters.AddWithValue("@Genre", entity.Genre);
-                        command.Parameters.AddWithValue("@Price", entity.UnitPrice);
-                        command.Parameters.AddWithValue("@Id", entity.GameId);
+                        _parameters.InitializeGameParameters(command, entity);
                         return command.ExecuteNonQuery();
                     }
                 }
@@ -218,9 +163,9 @@ namespace GameLibraryData.AdoNet.Repository
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(DeleteGamesQuery, connection))
+                    using (SqlCommand command = new SqlCommand(_queries.DeleteGamesQuery, connection))
                     {
-                        command.Parameters.AddWithValue("@Id", id);
+                        _parameters.InitializeGameIdParameter(command, id);
                         return command.ExecuteNonQuery();
                     }
                 }
@@ -251,13 +196,11 @@ namespace GameLibraryData.AdoNet.Repository
                     SqlTransaction transaction = connection.BeginTransaction();
                     try
                     {
-                        SqlCommand command = new SqlCommand(UpdateTitleAndGenreQuery, connection, transaction);
-                        command.Parameters.AddWithValue("@Title", games.Title);
-                        command.Parameters.AddWithValue("@Genre", games.Genre);
-                        command.Parameters.AddWithValue("@Id", games.GameId);
+                        SqlCommand command = new SqlCommand(_queries.UpdateTitleAndGenreQuery, connection, transaction);
+                        _parameters.InitializeGameTitleAndGenreParameters(command, games);
                         int result1 = command.ExecuteNonQuery();
-                        command = new SqlCommand(DeleteGamesQuery, connection, transaction);
-                        command.Parameters.AddWithValue("@Id", id);
+                        command = new SqlCommand(_queries.DeleteGamesQuery, connection, transaction);
+                        _parameters.InitializeGameIdParameter(command, id);
                         int result2 = command.ExecuteNonQuery();
                         if (result1 <= 0 || result2 <= 0)
                             throw new Exception();
@@ -286,24 +229,27 @@ namespace GameLibraryData.AdoNet.Repository
                     """);
             }
         }
-
-        private Games ReadGames(SqlDataReader reader)
-        {
-            return new Games
-            {
-                GameId = reader.GetInt32(0),
-                Title = reader.GetString(1),
-                Developer = reader.GetString(2),
-                Publisher = reader.GetString(3),
-                ReleaseDate = reader.GetDateTime(4),
-                Genre = reader.GetString(5),
-                UnitPrice = reader.GetDecimal(6),
-            };
-        }
-
         public bool Create(Games entity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(_queries.InsertGamesQuery, connection))
+                    {
+                        _parameters.InitializeInsertGameParameters(command, entity);
+                        int result = command.ExecuteNonQuery();
+                        return result > 0;
+                    }
+                }
+            } catch (Exception exception)
+            {
+                throw new Exception($$"""
+                    Database error while inserting games.
+                    Message: {{exception.Message}}
+                    """);
+            }
         }
     }
 }

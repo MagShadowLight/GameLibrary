@@ -20,7 +20,7 @@ namespace GameLibraryData.EfCore.Controllers
 
         public User GetByName(string name)
         {
-            throw new NotImplementedException();
+            return _context.Users.FirstOrDefault(x => x.UserName == name)!;
         }
 
         public int Update(User entity)

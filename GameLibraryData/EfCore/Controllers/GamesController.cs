@@ -27,7 +27,7 @@ namespace GameLibraryData.EfCore.Controllers
 
         public Game GetByName(string name)
         {
-            throw new NotImplementedException();
+            return _context.Games.FirstOrDefault(x => x.Title == name)!;
         }
 
         public int Update(Game entity)

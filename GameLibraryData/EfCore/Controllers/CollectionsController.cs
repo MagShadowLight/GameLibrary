@@ -2,11 +2,6 @@
 using GameLibraryData.EfCore.Entities;
 using GameLibraryData.Interface;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameLibraryData.EfCore.Controllers
 {
@@ -15,17 +10,26 @@ namespace GameLibraryData.EfCore.Controllers
         private GameLibraryDbContext _context = new GameLibraryDbContext();
         public List<Collection> GetAll()
         {
-            return _context.Collections.ToList();
+            return _context.Collections
+                .Include(g => g.Game)
+                .Include(u => u.User)
+                .ToList();
         }
 
         public Collection GetById(int id)
         {
-            return _context.Collections.FirstOrDefault(x => x.CollectionId == id)!;
+            return _context.Collections
+                .Include(g => g.Game)
+                .Include(u => u.User)
+                .FirstOrDefault(x => x.CollectionId == id)!;
         }
 
         public Collection GetByName(string name)
         {
-            throw new NotImplementedException();
+            List<Collection> collections = _context.Collections.Where(x => x.User.UserName == name).ToList();
+            Random rng = new Random();
+            var result = rng.Next(0, collections.Count);
+            return collections[result];
         }
 
         public int Update(Collection entity)
@@ -73,25 +77,6 @@ namespace GameLibraryData.EfCore.Controllers
                 Console.WriteLine(ex.Message);
                 return false;
             }
-        }
-        public Collection GetCollectionWithRelationshipById(int id)
-        {
-            try
-            {
-                Collection? collection = _context.Collections
-                    .Include(g => g.Game)
-                    .Include(u => u.User)
-                    .FirstOrDefault(i => i.CollectionId == id);
-                if (collection == null)
-                {
-                    throw new Exception($"ERROR: Collection by Id: {id} is not found");
-                }
-                return collection;
-            } catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
-        }
+        }        
     }
 }
