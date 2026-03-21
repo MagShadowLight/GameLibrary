@@ -1,8 +1,12 @@
+-- Create and Connect GameLibrary database
+
 CREATE DATABASE GameLibrary
 GO
 
 USE GameLibrary
 GO
+
+-- Create the tables --
 
 CREATE TABLE Games (
 	GameId int NOT NULL IDENTITY(1,1) PRIMARY KEY,
@@ -37,6 +41,10 @@ CREATE TABLE Collections (
 	CONSTRAINT fk_Collections_Games FOREIGN KEY (GameId) REFERENCES Games(GameId)
 )
 GO
+
+-- Insert the data into a table --
+
+-- Games --
 
 INSERT INTO Games (
 	Title,
@@ -87,6 +95,8 @@ VALUES (
 	39.99
 )
 GO
+
+-- Users --
 
 INSERT INTO Users (
 	UserName,
@@ -144,6 +154,8 @@ INSERT INTO Users (
 )
 GO
 
+-- Collections --
+
 INSERT INTO Collections (
 	UserId,
 	GameId,
@@ -181,3 +193,15 @@ INSERT INTO Collections (
 	10000
 )
 GO
+
+-- Create Stored Procedure --
+
+CREATE OR ALTER PROCEDURE dbo.SelectGamesByGenre
+    @Genre nvarchar(max)
+AS
+BEGIN
+    SELECT u.GameId, u.Title, u.Developer, u.Publisher, u.ReleaseDate, u.Genre, u.Prices
+    FROM dbo.Games u
+    WHERE u.Genre = @Genre
+    ORDER BY u.GameId
+END

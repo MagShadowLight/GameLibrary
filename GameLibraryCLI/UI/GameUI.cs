@@ -85,15 +85,13 @@ namespace GameLibraryCLI.UI
                                 case 0:
                                     return;
                                 default:
-                                    Console.WriteLine("Invalid choice. Please try again.");
-                                    Console.ReadKey();
+                                    _printer.PrintError("Invalid choice. Please try again.");
                                     break;
                             }
                         }
                         else
                         {
-                            Console.WriteLine("ERROR: Failed to parse int");
-                            Console.ReadKey();
+                            _printer.PrintError("Failed to parse int");
                         }
                     }
                     else
@@ -163,8 +161,7 @@ namespace GameLibraryCLI.UI
                                 case 0:
                                     return;
                                 default:
-                                    Console.WriteLine("Invalid choice. Please try again.");
-                                    Console.ReadKey();
+                                    _printer.PrintError("Invalid choice. Please try again.");
                                     break;
                             }
                         }

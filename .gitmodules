@@ -1,0 +1,3 @@
+[submodule "EncryptionTools"]
+	path = EncryptionTools
+	url = https://github.com/MagShadowLight/EncryptionTools.git

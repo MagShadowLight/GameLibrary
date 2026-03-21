@@ -1,4 +1,5 @@
-﻿using GameLibraryCLI.UI;
+﻿using EncryptorTools;
+using GameLibraryCLI.UI;
 using GameLibraryCLI.Utils;
 
 namespace GameLibraryCLI
@@ -6,10 +7,11 @@ namespace GameLibraryCLI
     internal class Program
     {
         // Connection String: "Server=localhost;Database=GameLibrary;Trusted_Connection=True;TrustServerCertificate=True;"
-        private static string _ConnectionString = Encryptor.Decrypt("connectionstring.txt");
+        private static string _ConnectionString = Encrypter.Decrypt("connectionstring.txt");
         private static CollectionUI collectionUI = new CollectionUI(_ConnectionString);
         private static UserUI userUI = new UserUI(_ConnectionString);
         private static GameUI gameUI = new GameUI(_ConnectionString);
+        private static Printer _printer = new Printer();
         static void Main(string[] args)
         {
             Console.Title = "Game Library CLI";
@@ -39,7 +41,7 @@ namespace GameLibraryCLI
                         Console.WriteLine("Goodbye");
                         return;
                     default:
-                        Console.WriteLine("ERROR: Invalid choice. Please Try Again.");
+                        _printer.PrintError("Invalid choice. Please Try Again.");
                         break;
                 }
                 Console.Clear();
@@ -63,7 +65,7 @@ namespace GameLibraryCLI
                     collectionUI.RunCollectionsAccessUI(dataAccessSystem);
                     break;
                 default:
-                    Console.WriteLine("Invalid Choice. Please Try Again.");
+                    _printer.PrintError("Invalid Choice. Please Try Again.");
                     break;
             }
         }

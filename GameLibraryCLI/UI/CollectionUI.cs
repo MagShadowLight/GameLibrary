@@ -84,7 +84,7 @@ namespace GameLibraryCLI.UI
                                 case 0:
                                     return;
                                 default:
-                                    Console.WriteLine("Invalid Choice. Please Try Again.");
+                                    _printer.PrintError("Invalid Choice. Please Try Again.");
                                     Console.ReadKey();
                                     break;
                             }
@@ -131,8 +131,7 @@ namespace GameLibraryCLI.UI
                                 case 0:
                                     return;
                                 default:
-                                    Console.WriteLine("Invalid Choice. Please Try Again.");
-                                    Console.ReadKey();
+                                    _printer.PrintError("Invalid Choice. Please Try Again.");
                                     break;
                             }
                         }
